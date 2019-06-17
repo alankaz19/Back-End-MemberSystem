@@ -1,0 +1,19 @@
+{
+  "name": "member_system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "ssh": "ssh alankaz19@104.199.254.24 -p 22 -i \"C:/Users/alank/.ssh/id_rsa\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.6.0"
+  }
+}
