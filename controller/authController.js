@@ -1,7 +1,9 @@
 
 const Member = require('../models/member');
 
-const register = (req, res, next) => {
+const checker = require('../utils/checker')
+
+const register = async (req, res, next) => {
 
     let phone = req.body.phone;
     let password = req.body.password;
@@ -10,15 +12,68 @@ const register = (req, res, next) => {
     let gender = req.body.gender;
     let job = req.body.job;
 
-    if(phone === undefined
-        ||password === undefined
-        ||firstName === undefined
-        ||lastName === undefined
-        ||gender === undefined
-        ||job === undefined){
-            res.json({status: 400, msg: 'BAD REQUEST'});
-            return;
-        }
+    //with nilchecker function
+    if (!checker.nilChecker(req.body, 5, ['job'])) {
+        res.json({
+            status: 400,
+            msg: 'Bad Request or Fill the options incorrectly'
+        })
+    }
+   
+  
+    // not with nilChecker function
+
+    // if(phone === undefined
+    //     || password === undefined
+    //     || firstName === undefined
+    //     || lastName === undefined
+    //     || gender === undefined
+    //     || job === undefined) {
+    //         res.json({status: 400, msg: 'BAD REQUEST'});
+    //         return;
+    //     }
+
+    // if(phone == '' || password == '' || firstName == '' || lastName == '' || gender == '' || job == ''){
+    //     res.json({status: 400, msg: 'please fill the options'})
+    //     return;
+    // }
+
+    if (isNaN(phone)) {
+        res.json({
+            status: 400,
+            msg: 'phone  should be numbers'
+        })
+        return;
+    }
+
+    
+
+    if (isNaN(gender)) {
+        res.json({
+            status: 400,
+            msg: 'gender should be numbers'
+        })
+        return;
+    }
+
+
+
+    if(!checker.CheckPassword(password)) {
+        res.json({status: 400, msg: 'Invalid password'});
+        return;
+    }
+
+   
+
+    let members = await Member.findByAccount(phone, password);
+    if (members.length >= 1) {
+        res.json({
+            status: 400,
+            msg: 'Same account exists'
+        })
+        return;
+    }
+
     let member = new Member({
         phone: phone,
         password: password,
@@ -30,34 +85,57 @@ const register = (req, res, next) => {
         job: job
     });
     member.save().then(() => res.json({status: 200, msg: 'success'}));
-
 }
 
-// login option
-// const login = async (req, res, next) =>{
-//     let members = await Member.find().byAccount(req.body.phone , req.body.password);
-//         res.json(members);
-// }
 
 const login = async (req, res ,next) => {
-    let members = await User.findByAccount(req.body.phone, req.body.password)
-    //判斷邏輯寫這裡 if members data == correct;
-    res.json({status: 200, msg: 'Invalid user name or password'});
-    res.json({status: 400, msg: 'BAD REQUEST'});
+    let phone = req.body.phone;
+    let password = req.body.password;
     
-}
+      if (phone === undefined ||
+          password === undefined) {
+       
+            res.json({
+            status: 400,
+            msg: 'BAD REQUEST'
+          });
+          return;
+      }
 
+      if (phone == '' || password == '') {
+          res.json({
+              status: 400,
+              msg: 'please fill the options'
+          })
+          return;
+      }
 
+    //判斷大小寫以及長度
+     if (isNaN(phone)) {
+         res.json({
+             status: 400,
+             msg: 'phone should be numbers'
+         })
+         return;
+     }
 
-const findSameLevel = async (req, res, next) => {
-    var user = await User.findOne().byName(req.body.firstName , req.body.lastName);
-
-    let users = await user.findSameLevel();
+     if (!checker.CheckPassword(password)) {
+         res.json({
+             status: 400,
+             msg: 'Invalid user name or password'
+         });
+         return;
+     }
     
-    res.json({status : -1, msg: {users : users}})
 
+    let members = await Member.findByAccount(phone, password);
+    if(members.length > 0){
+        res.json({ status: 200, members: members});
+    }else{
+        res.json({ status: 400, msg: 'dosent exist'});
+    }
+   
 }
-
 
 
 module.exports = {
